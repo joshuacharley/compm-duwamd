@@ -1,24 +1,30 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Header } from '@/components/Header';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { useState, useEffect } from "react";
+import { Header } from "@/components/Header";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+
+interface Project {
+  _id: string;
+  name: string;
+  status: string;
+}
 
 export default function ProjectsClient() {
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchProjects() {
       try {
-        const response = await fetch('/api/projects');
+        const response = await fetch("/api/projects");
         const data = await response.json();
         setProjects(data);
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching projects:', error);
+        console.error("Error fetching projects:", error);
         setLoading(false);
       }
     }
@@ -47,7 +53,9 @@ export default function ProjectsClient() {
               </CardHeader>
               <CardContent>
                 <p>Status: {project.status}</p>
-                <Button className="mt-2" variant="outline">View Details</Button>
+                <Button className="mt-2" variant="outline">
+                  View Details
+                </Button>
               </CardContent>
             </Card>
           ))}

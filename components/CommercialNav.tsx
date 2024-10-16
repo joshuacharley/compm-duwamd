@@ -1,66 +1,100 @@
-import React from 'react';
-import Link from 'next/link';
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
+import React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
+import { Button } from "@/components/ui/button";
+import {
+  FileText,
+  Users,
+  PieChart,
+  Briefcase,
+  Calendar,
+  CheckSquare,
+  Target,
+  BarChart,
+  Gift,
+  MessageSquare,
+  Clipboard,
+  Zap,
+  TrendingUp,
+  Activity,
+} from "lucide-react";
 
 const CommercialNav = () => {
+  const pathname = usePathname();
+
+  const mainMenuItems = [
+    { href: "/bids", label: "Bids", icon: FileText },
+    { href: "/attendance", label: "Attendance", icon: Users },
+    { href: "/pre-sales", label: "Pre-Sales", icon: Briefcase },
+    { href: "/reports", label: "Reports", icon: PieChart },
+    { href: "/projects", label: "Projects", icon: Clipboard },
+    { href: "/tasks", label: "Tasks", icon: CheckSquare },
+  ];
+
+  const moreMenuItems = [
+    { href: "/trackers", label: "Trackers", icon: Target },
+    { href: "/weekly-report", label: "Weekly Report", icon: BarChart },
+    { href: "/birthday-wishes", label: "Birthday Wishes", icon: Gift },
+    {
+      href: "/directors-remarks",
+      label: "Director's Remarks",
+      icon: MessageSquare,
+    },
+    { href: "/action-plan", label: "Action Plan", icon: Clipboard },
+    { href: "/action-points", label: "Action Points", icon: Zap },
+    {
+      href: "/sales-contributions",
+      label: "Sales Contributions",
+      icon: TrendingUp,
+    },
+    {
+      href: "/activation-performance",
+      label: "Activation Performance",
+      icon: Activity,
+    },
+    {
+      href: "/horeca-kam-tracking",
+      label: "HORECA & KAM Tracking",
+      icon: Target,
+    },
+    { href: "/installation-setup", label: "Installation Setup", icon: Zap },
+  ];
+
   return (
     <NavigationMenu className="hidden md:flex">
       <NavigationMenuList>
+        {mainMenuItems.map((item) => (
+          <NavigationMenuItem key={item.href}>
+            <Link href={item.href} legacyBehavior passHref>
+              <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                <item.icon className="w-4 h-4 mr-2" />
+                {item.label}
+              </NavigationMenuLink>
+            </Link>
+          </NavigationMenuItem>
+        ))}
         <NavigationMenuItem>
-          <NavigationMenuTrigger>Commercial Department</NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-              <li className="row-span-3">
-                <NavigationMenuLink asChild>
-                  <Link
-                    className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
-                    href="/"
-                  >
-                    <div className="mb-2 mt-4 text-lg font-medium">
-                      Commercial Department
-                    </div>
-                    <p className="text-sm leading-tight text-muted-foreground">
-                      Overview of the Commercial Department
-                    </p>
-                  </Link>
-                </NavigationMenuLink>
-              </li>
-              <ListItem href="/director" title="Director">
-                Commercial Department Director
-              </ListItem>
-            </ul>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <NavigationMenuTrigger>B2B</NavigationMenuTrigger>
+          <NavigationMenuTrigger>More</NavigationMenuTrigger>
           <NavigationMenuContent>
             <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-              <ListItem href="/b2b/pre-sales" title="Pre-Sales">
-                B2B Pre-Sales operations
-              </ListItem>
-              <ListItem href="/b2b/sales" title="Sales">
-                B2B Sales operations
-              </ListItem>
-              <ListItem href="/b2b/after-sales" title="After Sales">
-                B2B After Sales services
-              </ListItem>
-            </ul>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <NavigationMenuTrigger>B2C</NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-              <ListItem href="/b2c/sales-distribution" title="Sales Distribution">
-                B2C Sales Distribution
-              </ListItem>
-              <ListItem href="/b2c/indirect-sales" title="Indirect Sales">
-                B2C Indirect Sales
-              </ListItem>
-              <ListItem href="/b2c/digital-sales" title="Digital Sales">
-                B2C Digital Sales
-              </ListItem>
+              {moreMenuItems.map((item) => (
+                <ListItem
+                  key={item.href}
+                  title={item.label}
+                  href={item.href}
+                  icon={item.icon}
+                />
+              ))}
             </ul>
           </NavigationMenuContent>
         </NavigationMenuItem>
@@ -71,12 +105,12 @@ const CommercialNav = () => {
 
 const ListItem = React.forwardRef<
   React.ElementRef<"a">,
-  React.ComponentPropsWithoutRef<"a">
->(({ className, title, children, ...props }, ref) => {
+  React.ComponentPropsWithoutRef<"a"> & { icon: React.ElementType }
+>(({ className, title, children, icon: Icon, ...props }, ref) => {
   return (
     <li>
       <NavigationMenuLink asChild>
-        <Link
+        <a
           ref={ref}
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
@@ -84,11 +118,14 @@ const ListItem = React.forwardRef<
           )}
           {...props}
         >
-          <div className="text-sm font-medium leading-none">{title}</div>
+          <div className="flex items-center">
+            <Icon className="w-4 h-4 mr-2" />
+            <div className="text-sm font-medium leading-none">{title}</div>
+          </div>
           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
             {children}
           </p>
-        </Link>
+        </a>
       </NavigationMenuLink>
     </li>
   );

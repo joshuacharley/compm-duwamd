@@ -6,8 +6,8 @@ export async function GET(request: Request) {
   try {
     const client = await clientPromise;
     const db = client.db("commercial_pm");
-    const projects = await db.collection("projects").find({}).toArray();
-    return NextResponse.json(projects);
+    const attendance = await db.collection("attendances").find({}).toArray();
+    return NextResponse.json(attendance);
   } catch (e) {
     console.error(e);
     return NextResponse.json(
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     const client = await clientPromise;
     const db = client.db("commercial_pm");
     const body = await request.json();
-    const result = await db.collection("projects").insertOne(body);
+    const result = await db.collection("attendances").insertOne(body);
     return NextResponse.json(result);
   } catch (e) {
     console.error(e);
@@ -40,7 +40,7 @@ export async function PUT(request: Request) {
     const body = await request.json();
     const { _id, ...updateData } = body;
     const result = await db
-      .collection("projects")
+      .collection("attendances")
       .updateOne({ _id: new ObjectId(_id) }, { $set: updateData });
     return NextResponse.json(result);
   } catch (e) {
@@ -58,7 +58,7 @@ export async function DELETE(request: Request) {
     const db = client.db("commercial_pm");
     const { id } = await request.json();
     const result = await db
-      .collection("projects")
+      .collection("attendances")
       .deleteOne({ _id: new ObjectId(id) });
     return NextResponse.json(result);
   } catch (e) {
