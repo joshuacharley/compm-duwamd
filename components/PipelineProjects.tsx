@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
@@ -74,14 +72,10 @@ interface PipelineProject {
 const PipelineProjects: React.FC = () => {
   const [projects, setProjects] = useState<PipelineProject[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [newProject, setNewProject] = useState<Partial<PipelineProject>>({});
   const [editingProject, setEditingProject] = useState<PipelineProject | null>(
     null
   );
-  const [newProject, setNewProject] = useState<Partial<PipelineProject>>({
-    status: "Open",
-    department: "B2B",
-  });
 
   useEffect(() => {
     fetchProjects();
@@ -90,7 +84,9 @@ const PipelineProjects: React.FC = () => {
   const fetchProjects = async () => {
     try {
       const response = await fetch("/api/pipeline-projects");
-      if (!response.ok) throw new Error("Failed to fetch projects");
+      if (!response.ok) {
+        throw new Error("Failed to fetch projects");
+      }
       const data = await response.json();
       setProjects(data);
     } catch (error) {
@@ -103,13 +99,20 @@ const PipelineProjects: React.FC = () => {
     try {
       const response = await fetch("/api/pipeline-projects", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(newProject),
       });
-      if (!response.ok) throw new Error("Failed to add project");
-      await fetchProjects();
+
+      if (!response.ok) {
+        throw new Error("Failed to add project");
+      }
+
+      const addedProject = await response.json();
+      setProjects([...projects, addedProject]);
+      setNewProject({});
       setIsAddDialogOpen(false);
-      setNewProject({ status: "Open", department: "B2B" });
       toast.success("Project added successfully");
     } catch (error) {
       console.error("Error adding project:", error);
@@ -119,18 +122,27 @@ const PipelineProjects: React.FC = () => {
 
   const handleEditProject = async () => {
     if (!editingProject) return;
+
     try {
       const response = await fetch(
         `/api/pipeline-projects/${editingProject._id}`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify(editingProject),
         }
       );
-      if (!response.ok) throw new Error("Failed to update project");
-      await fetchProjects();
-      setIsEditDialogOpen(false);
+
+      if (!response.ok) {
+        throw new Error("Failed to update project");
+      }
+
+      const updatedProject = await response.json();
+      setProjects(
+        projects.map((p) => (p._id === updatedProject._id ? updatedProject : p))
+      );
       setEditingProject(null);
       toast.success("Project updated successfully");
     } catch (error) {
@@ -140,13 +152,16 @@ const PipelineProjects: React.FC = () => {
   };
 
   const handleDeleteProject = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this project?")) return;
     try {
       const response = await fetch(`/api/pipeline-projects/${id}`, {
         method: "DELETE",
       });
-      if (!response.ok) throw new Error("Failed to delete project");
-      await fetchProjects();
+
+      if (!response.ok) {
+        throw new Error("Failed to delete project");
+      }
+
+      setProjects(projects.filter((p) => p._id !== id));
       toast.success("Project deleted successfully");
     } catch (error) {
       console.error("Error deleting project:", error);
@@ -158,9 +173,9 @@ const PipelineProjects: React.FC = () => {
     project: Partial<PipelineProject>,
     setProject: React.Dispatch<React.SetStateAction<any>>
   ) => (
-    <>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
+    <ScrollArea className="h-[60vh] pr-4">
+      <div className="space-y-4 pr-4">
+        <div>
           <Label htmlFor="customerName">Customer Name</Label>
           <Input
             id="customerName"
@@ -168,10 +183,9 @@ const PipelineProjects: React.FC = () => {
             onChange={(e) =>
               setProject({ ...project, customerName: e.target.value })
             }
-            placeholder="Enter customer name"
           />
         </div>
-        <div className="space-y-2">
+        <div>
           <Label htmlFor="service">Service</Label>
           <Input
             id="service"
@@ -179,12 +193,9 @@ const PipelineProjects: React.FC = () => {
             onChange={(e) =>
               setProject({ ...project, service: e.target.value })
             }
-            placeholder="Enter service"
           />
         </div>
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
+        <div>
           <Label htmlFor="numberOfLinks">Number of Links</Label>
           <Input
             id="numberOfLinks"
@@ -196,10 +207,9 @@ const PipelineProjects: React.FC = () => {
                 numberOfLinks: parseInt(e.target.value),
               })
             }
-            placeholder="Enter number of links"
           />
         </div>
-        <div className="space-y-2">
+        <div>
           <Label htmlFor="bandwidth">Bandwidth</Label>
           <Input
             id="bandwidth"
@@ -207,23 +217,19 @@ const PipelineProjects: React.FC = () => {
             onChange={(e) =>
               setProject({ ...project, bandwidth: e.target.value })
             }
-            placeholder="Enter bandwidth"
           />
         </div>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="contractTerms">Contract Terms</Label>
-        <Input
-          id="contractTerms"
-          value={project.contractTerms || ""}
-          onChange={(e) =>
-            setProject({ ...project, contractTerms: e.target.value })
-          }
-          placeholder="Enter contract terms"
-        />
-      </div>
-      <div className="grid grid-cols-3 gap-4">
-        <div className="space-y-2">
+        <div>
+          <Label htmlFor="contractTerms">Contract Terms</Label>
+          <Input
+            id="contractTerms"
+            value={project.contractTerms || ""}
+            onChange={(e) =>
+              setProject({ ...project, contractTerms: e.target.value })
+            }
+          />
+        </div>
+        <div>
           <Label htmlFor="oneOffCost">One-off Cost</Label>
           <Input
             id="oneOffCost"
@@ -232,10 +238,9 @@ const PipelineProjects: React.FC = () => {
             onChange={(e) =>
               setProject({ ...project, oneOffCost: parseFloat(e.target.value) })
             }
-            placeholder="Enter one-off cost"
           />
         </div>
-        <div className="space-y-2">
+        <div>
           <Label htmlFor="monthlyCost">Monthly Cost</Label>
           <Input
             id="monthlyCost"
@@ -247,10 +252,9 @@ const PipelineProjects: React.FC = () => {
                 monthlyCost: parseFloat(e.target.value),
               })
             }
-            placeholder="Enter monthly cost"
           />
         </div>
-        <div className="space-y-2">
+        <div>
           <Label htmlFor="dealWorth">Deal Worth</Label>
           <Input
             id="dealWorth"
@@ -259,12 +263,9 @@ const PipelineProjects: React.FC = () => {
             onChange={(e) =>
               setProject({ ...project, dealWorth: parseFloat(e.target.value) })
             }
-            placeholder="Enter deal worth"
           />
         </div>
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
+        <div>
           <Label htmlFor="responsibility">Responsibility</Label>
           <Input
             id="responsibility"
@@ -272,82 +273,78 @@ const PipelineProjects: React.FC = () => {
             onChange={(e) =>
               setProject({ ...project, responsibility: e.target.value })
             }
-            placeholder="Enter responsibility"
           />
         </div>
-        <div className="space-y-2">
+        <div>
           <Label htmlFor="department">Department</Label>
-          <Select
-            value={project.department}
-            onValueChange={(value) =>
-              setProject({ ...project, department: value })
+          <Input
+            id="department"
+            value={project.department || ""}
+            onChange={(e) =>
+              setProject({ ...project, department: e.target.value })
             }
+          />
+        </div>
+        <div>
+          <Label htmlFor="status">Status</Label>
+          <Select
+            value={project.status || ""}
+            onValueChange={(value) => setProject({ ...project, status: value })}
           >
-            <SelectTrigger id="department">
-              <SelectValue placeholder="Select department" />
+            <SelectTrigger id="status">
+              <SelectValue placeholder="Select status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="B2B">B2B</SelectItem>
-              <SelectItem value="B2C">B2C</SelectItem>
+              <SelectItem value="Open">Open</SelectItem>
+              <SelectItem value="Ongoing">Ongoing</SelectItem>
+              <SelectItem value="Closed">Closed</SelectItem>
             </SelectContent>
           </Select>
         </div>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="status">Status</Label>
-        <Select
-          value={project.status}
-          onValueChange={(value) =>
-            setProject({
-              ...project,
-              status: value as "Open" | "Ongoing" | "Closed",
-            })
-          }
-        >
-          <SelectTrigger id="status">
-            <SelectValue placeholder="Select status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Open">Open</SelectItem>
-            <SelectItem value="Ongoing">Ongoing</SelectItem>
-            <SelectItem value="Closed">Closed</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="comments">Comments</Label>
-        <Input
-          id="comments"
-          value={project.comments || ""}
-          onChange={(e) => setProject({ ...project, comments: e.target.value })}
-          placeholder="Enter comments"
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
+        <div>
+          <Label htmlFor="comments">Comments</Label>
+          <Input
+            id="comments"
+            value={project.comments || ""}
+            onChange={(e) =>
+              setProject({ ...project, comments: e.target.value })
+            }
+          />
+        </div>
+        <div>
           <Label htmlFor="requestDate">Request Date</Label>
           <Input
             id="requestDate"
             type="date"
-            value={project.requestDate || ""}
+            value={
+              project.requestDate
+                ? new Date(project.requestDate).toISOString().split("T")[0]
+                : ""
+            }
             onChange={(e) =>
               setProject({ ...project, requestDate: e.target.value })
             }
           />
         </div>
-        <div className="space-y-2">
+        <div>
           <Label htmlFor="expectedClosureDate">Expected Closure Date</Label>
           <Input
             id="expectedClosureDate"
             type="date"
-            value={project.expectedClosureDate || ""}
+            value={
+              project.expectedClosureDate
+                ? new Date(project.expectedClosureDate)
+                    .toISOString()
+                    .split("T")[0]
+                : ""
+            }
             onChange={(e) =>
               setProject({ ...project, expectedClosureDate: e.target.value })
             }
           />
         </div>
       </div>
-    </>
+    </ScrollArea>
   );
 
   return (
@@ -363,17 +360,20 @@ const PipelineProjects: React.FC = () => {
                 <Plus className="mr-2 h-4 w-4" /> Add New Project
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+            <DialogContent className="sm:max-w-[600px]">
               <DialogHeader>
-                <DialogTitle>Add New Pipeline Project</DialogTitle>
+                <DialogTitle className="text-2xl font-bold">
+                  Add New Pipeline Project
+                </DialogTitle>
               </DialogHeader>
-              <ScrollArea className="flex-grow">
-                <div className="grid gap-4 py-4 px-6">
-                  {renderFormFields(newProject, setNewProject)}
-                </div>
-              </ScrollArea>
-              <div className="mt-4 flex justify-end">
-                <Button onClick={handleAddProject}>Add Project</Button>
+              {renderFormFields(newProject, setNewProject)}
+              <div className="mt-6 flex justify-end">
+                <Button
+                  onClick={handleAddProject}
+                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                >
+                  Add Project
+                </Button>
               </div>
             </DialogContent>
           </Dialog>
@@ -475,34 +475,30 @@ const PipelineProjects: React.FC = () => {
                     </TableBody>
                   </Table>
                   <div className="mt-4 flex justify-end space-x-2">
-                    <Dialog
-                      open={isEditDialogOpen}
-                      onOpenChange={setIsEditDialogOpen}
-                    >
+                    <Dialog>
                       <DialogTrigger asChild>
                         <Button
                           variant="outline"
-                          onClick={() => setEditingProject(project)}
+                          onClick={() => {
+                            setEditingProject(project);
+                          }}
                         >
                           <Edit className="mr-2 h-4 w-4" /> Edit
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+                      <DialogContent className="sm:max-w-[600px]">
                         <DialogHeader>
-                          <DialogTitle>Edit Pipeline Project</DialogTitle>
+                          <DialogTitle className="text-2xl font-bold">
+                            Edit Pipeline Project
+                          </DialogTitle>
                         </DialogHeader>
-                        {editingProject && (
-                          <ScrollArea className="flex-grow">
-                            <div className="grid gap-4 py-4 px-6">
-                              {renderFormFields(
-                                editingProject,
-                                setEditingProject
-                              )}
-                            </div>
-                          </ScrollArea>
-                        )}
-                        <div className="mt-4 flex justify-end">
-                          <Button onClick={handleEditProject}>
+                        {editingProject &&
+                          renderFormFields(editingProject, setEditingProject)}
+                        <div className="mt-6 flex justify-end">
+                          <Button
+                            onClick={handleEditProject}
+                            className="bg-blue-500 hover:bg-blue-600 text-white"
+                          >
                             Update Project
                           </Button>
                         </div>

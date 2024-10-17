@@ -11,7 +11,7 @@ export default function WeeklyReportPage() {
   const [salesContributions, setSalesContributions] = useState(null);
 
   useEffect(() => {
-    // Fetch weekly report data from API
+// Fetch weekly report data from API/DB  
     // For now, we'll use mock data
     setWeeklyData({
       weekNumber: 41,
@@ -38,8 +38,8 @@ export default function WeeklyReportPage() {
         'Kaard Automobile SL- Closed with CUG 10lines- SLe2,800',
         'Sierra Leone Commercial Bank- Closed with Devices- SLe4,400',
         'HMB SL- Closed with FTTX 60mbps- SLe3,750'
-      ],
-      difficulties: [
+      ],                                                                 xx                    
+      difficulties: [ 
         'No bank for payments in Waterloo and Wellington shops'
       ],
       alignmentRequest: [
@@ -79,9 +79,8 @@ export default function WeeklyReportPage() {
           <div className="mb-8">
             <h2 className="text-2xl font-bold mb-4">Activity Report</h2>
             <Card className="mb-4">
-              <CardHeader>
-                <CardTitle>Information Sharing</CardTitle>
-              </CardHeader>
+              
+                <CardTitle>Information Sharing</CardTitle>`2`
               <CardContent>
                 <ul className="list-disc pl-5">
                   {activityReport.informationSharing.map((item, index) => (
@@ -91,7 +90,7 @@ export default function WeeklyReportPage() {
               </CardContent>
             </Card>
             <Card className="mb-4">
-              <CardHeader>
+              <CardHeader> 
                 <CardTitle>What has worked well</CardTitle>
               </CardHeader>
               <CardContent>

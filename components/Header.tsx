@@ -16,7 +16,11 @@ import {
 } from "@/components/ui/sheet";
 
 export function Header() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+
+  if (status === "loading") {
+    return null; // or a loading spinner
+  }
 
   return (
     <header className="bg-background border-b">
