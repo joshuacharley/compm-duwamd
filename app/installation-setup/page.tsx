@@ -1,58 +1,65 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Header } from '@/components/Header';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import { useState, useEffect } from "react";
+import { Header } from "@/components/Header";
+import InstallationSetupList from "@/components/InstallationSetupList";
+import InstallationSetupForm from "@/components/InstallationSetupForm";
+import { Button } from "@/components/ui/button";
+import { PlusCircle } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function InstallationSetupPage() {
-  const [installations, setInstallations] = useState([]);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
 
-  useEffect(() => {
-    // Fetch installation and setup data from API
-    // For now, we'll use mock data
-    setInstallations([
-      { id: 1, customerName: 'Empire Solution', service: 'Cloud service', startDate: '19-Jul-24', dependency: 'Empire Solution', remarks: 'VPN configured and customer had to complete the integration from their end. Awaiting their feedback', aging: 117, status: 'Ongoing' },
-      { id: 2, customerName: 'Wave', service: 'SMPP', startDate: '08-Oct-24', dependency: 'Wave/CX/IT', remarks: 'Configuration ongoing and both teams are making progress', aging: 6, status: 'Open' },
-      // ... add more mock data
-    ]);
-  }, []);
+  const handleAddNew = () => {
+    setEditingItem(null);
+    setIsFormOpen(true);
+  };
+
+  const handleEdit = (item) => {
+    setEditingItem(item);
+    setIsFormOpen(true);
+  };
+
+  const handleFormClose = () => {
+    setIsFormOpen(false);
+    setEditingItem(null);
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container mx-auto mt-8">
-        <h1 className="text-3xl font-bold mb-4">Installation and Setup List</h1>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Customer Name</TableHead>
-              <TableHead>Service</TableHead>
-              <TableHead>Start Date</TableHead>
-              <TableHead>Dependency</TableHead>
-              <TableHead>Remarks</TableHead>
-              <TableHead>Aging (days)</TableHead>
-              <TableHead>Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {installations.map((install) => (
-              <TableRow key={install.id}>
-                <TableCell>{install.customerName}</TableCell>
-                <TableCell>{install.service}</TableCell>
-                <TableCell>{install.startDate}</TableCell>
-                <TableCell>{install.dependency}</TableCell>
-                <TableCell>{install.remarks}</TableCell>
-                <TableCell>{install.aging}</TableCell>
-                <TableCell>
-                  <Badge variant={install.status === 'Ongoing' ? 'default' : 'secondary'}>
-                    {install.status}
-                  </Badge>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      <main className="container mx-auto mt-8 px-4">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h1 className="text-3xl font-bold mb-4 text-gradient">
+            Installation and Setup List
+          </h1>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Button
+            onClick={handleAddNew}
+            className="mb-4 bg-brand-orange hover:bg-brand-orange/90 text-white"
+          >
+            <PlusCircle className="mr-2 h-4 w-4" /> Add New Installation
+          </Button>
+        </motion.div>
+        <InstallationSetupList onEdit={handleEdit} />
+        {isFormOpen && (
+          <InstallationSetupForm
+            isOpen={isFormOpen}
+            onClose={handleFormClose}
+            editingItem={editingItem}
+          />
+        )}
       </main>
     </div>
   );

@@ -16,28 +16,32 @@ import {
 } from "@/components/ui/sheet";
 
 export function Header() {
-  const { data: session, status } = useSession();
-
-  if (status === "loading") {
-    return null; // or a loading spinner
-  }
+  const { data: session } = useSession();
 
   return (
-    <header className="bg-background border-b">
+    <header className="bg-background border-b border-brand-orange">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
-          <Link href="/" className="text-2xl font-bold">
+          <Link href="/" className="text-2xl font-bold text-gradient">
             CommercialPM
           </Link>
           <div className="hidden md:flex items-center space-x-4">
             <CommercialNav />
             <ModeToggle />
             {session ? (
-              <Button variant="ghost" asChild>
+              <Button
+                variant="outline"
+                asChild
+                className="border-brand-orange text-brand-orange hover:bg-brand-orange hover:text-white"
+              >
                 <Link href="/api/auth/signout">Sign Out</Link>
               </Button>
             ) : (
-              <Button variant="ghost" asChild>
+              <Button
+                variant="outline"
+                asChild
+                className="border-brand-orange text-brand-orange hover:bg-brand-orange hover:text-white"
+              >
                 <Link href="/api/auth/signin">Sign In</Link>
               </Button>
             )}
@@ -51,7 +55,7 @@ export function Header() {
               </SheetTrigger>
               <SheetContent>
                 <SheetHeader>
-                  <SheetTitle>Menu</SheetTitle>
+                  <SheetTitle className="text-gradient">Menu</SheetTitle>
                   <SheetDescription>
                     Navigate through the Commercial Project Management app
                   </SheetDescription>
@@ -92,17 +96,29 @@ const MobileNav = () => {
   return (
     <nav className="flex flex-col space-y-4">
       {navItems.map((item) => (
-        <Link key={item.href} href={item.href} className="text-sm font-medium">
+        <Link
+          key={item.href}
+          href={item.href}
+          className="text-sm font-medium hover:text-brand-orange transition-colors"
+        >
           {item.label}
         </Link>
       ))}
       <ModeToggle />
       {session ? (
-        <Button variant="ghost" asChild>
+        <Button
+          variant="outline"
+          asChild
+          className="border-brand-orange text-brand-orange hover:bg-brand-orange hover:text-white"
+        >
           <Link href="/api/auth/signout">Sign Out</Link>
         </Button>
       ) : (
-        <Button variant="ghost" asChild>
+        <Button
+          variant="outline"
+          asChild
+          className="border-brand-orange text-brand-orange hover:bg-brand-orange hover:text-white"
+        >
           <Link href="/api/auth/signin">Sign In</Link>
         </Button>
       )}

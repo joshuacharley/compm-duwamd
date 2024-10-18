@@ -2,58 +2,24 @@
 
 import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { format, parseISO, isValid } from "date-fns";
 import PipelineProjects from "@/components/PipelineProjects";
 import ActivityReport from "@/components/ActivityReport";
+import { IActivityReport } from "@/models/ActivityReport";
 
 export default function PreSalesPage() {
-  const [activityReport, setActivityReport] = useState({
-    informationSharing: [],
-    workedWell: [],
-    difficulties: [],
-    alignmentRequest: [],
-  });
-
-  useEffect(() => {
-    fetchActivityReport();
-  }, []);
-
-  const fetchActivityReport = async () => {
+  const fetchActivityReports = async () => {
     try {
       const response = await fetch("/api/activity-reports");
       if (!response.ok) {
-        throw new Error("Failed to fetch activity report");
+        throw new Error("Failed to fetch activity reports");
       }
       const data = await response.json();
-      setActivityReport(data);
+      return data as IActivityReport[];
     } catch (error) {
-      console.error("Error fetching activity report:", error);
-      toast.error("Failed to load activity report");
-    }
-  };
-
-  const updateActivityReport = async (updatedReport: any) => {
-    try {
-      const response = await fetch("/api/activity-reports", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedReport),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update activity report");
-      }
-
-      setActivityReport(updatedReport);
-      toast.success("Activity report updated successfully");
-    } catch (error) {
-      console.error("Error updating activity report:", error);
-      toast.error("Failed to update activity report");
+      console.error("Error fetching activity reports:", error);
+      toast.error("Failed to load activity reports");
+      return [];
     }
   };
 
@@ -67,10 +33,7 @@ export default function PreSalesPage() {
 
         <PipelineProjects />
 
-        <ActivityReport
-          activityReport={activityReport}
-          updateActivityReport={updateActivityReport}
-        />
+        <ActivityReport fetchActivityReports={fetchActivityReports} />
       </main>
     </div>
   );

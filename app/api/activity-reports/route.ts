@@ -10,9 +10,8 @@ export async function GET(request: Request) {
       .collection("activityreports")
       .find({})
       .sort({ createdAt: -1 })
-      .limit(1)
       .toArray();
-    return NextResponse.json(activityReports[0] || {});
+    return NextResponse.json(activityReports);
   } catch (e) {
     console.error(e);
     return NextResponse.json(
@@ -27,7 +26,11 @@ export async function POST(request: Request) {
     const client = await clientPromise;
     const db = client.db("commercial_pm");
     const body = await request.json();
-    const result = await db.collection("activityreports").insertOne(body);
+    const result = await db.collection("activityreports").insertOne({
+      ...body,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
     return NextResponse.json(result);
   } catch (e) {
     console.error(e);
@@ -46,8 +49,19 @@ export async function PUT(request: Request) {
     const { _id, ...updateData } = body;
     const result = await db
       .collection("activityreports")
-      .updateOne({ _id: new ObjectId(_id) }, { $set: updateData });
-    return NextResponse.json(result);
+      .updateOne(
+        { _id: new ObjectId(_id) },
+        { $set: { ...updateData, updatedAt: new Date() } }
+      );
+    if (result.matchedCount === 0) {
+      return NextResponse.json(
+        { error: "Activity report not found" },
+        { status: 404 }
+      );
+    }
+    return NextResponse.json({
+      message: "Activity report updated successfully",
+    });
   } catch (e) {
     console.error(e);
     return NextResponse.json(

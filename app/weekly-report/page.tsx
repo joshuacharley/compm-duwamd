@@ -1,9 +1,16 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Header } from '@/components/Header';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useState, useEffect } from "react";
+import { Header } from "@/components/Header";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function WeeklyReportPage() {
   const [weeklyData, setWeeklyData] = useState(null);
@@ -11,49 +18,47 @@ export default function WeeklyReportPage() {
   const [salesContributions, setSalesContributions] = useState(null);
 
   useEffect(() => {
-// Fetch weekly report data from API/DB  
+    // Fetch weekly report data from API
     // For now, we'll use mock data
     setWeeklyData({
       weekNumber: 41,
       performanceMetrics: {
         sales: 1000000,
         newCustomers: 50,
-        customerRetention: 95
-      }
+        customerRetention: 95,
+      },
     });
 
     setActivityReport({
       informationSharing: [
-        'Lovinda Junior Academy- offer shared for CUG & Postpaid',
-        'Cinderalla Travel Tours- offer shared for Postpaid Service',
-        'The B2B sales management in shops in progress for Freetown- Rawdon street, HQ-Shop, Waterloo and wellington Shops closed',
-        'Agriculture Mining & Infrastructural- Appointment booked for different services',
-        'Edhancha Mining & Agriculture company- Appointment booked for CUG, FTTX &Postpaid service'
+        "Lovinda Junior Academy- offer shared for CUG & Postpaid",
+        "Cinderalla Travel Tours- offer shared for Postpaid Service",
+        "The B2B sales management in shops in progress for Freetown- Rawdon street, HQ-Shop, Waterloo and wellington Shops closed",
+        "Agriculture Mining & Infrastructural- Appointment booked for different services",
+        "Edhancha Mining & Agriculture company- Appointment booked for CUG, FTTX &Postpaid service",
       ],
       workedWell: [
-        'Nancy Sheriff- Closed with FTTX - Le2,500',
-        'Paul Koroma- Closed with Dedicated Internet 5mbps- Le8,510',
-        'Lovinda Junior Academy- Closed with FTTX 150mbps+ 2 extenders- SLe8,950',
-        'Techwire ICT Solutions- Closed with SMPP & APN service- SLe19,980',
-        'Kaard Automobile SL- Closed with CUG 10lines- SLe2,800',
-        'Sierra Leone Commercial Bank- Closed with Devices- SLe4,400',
-        'HMB SL- Closed with FTTX 60mbps- SLe3,750'
-      ],                                                                 xx                    
-      difficulties: [ 
-        'No bank for payments in Waterloo and Wellington shops'
+        "Nancy Sheriff- Closed with FTTX - Le2,500",
+        "Paul Koroma- Closed with Dedicated Internet 5mbps- Le8,510",
+        "Lovinda Junior Academy- Closed with FTTX 150mbps+ 2 extenders- SLe8,950",
+        "Techwire ICT Solutions- Closed with SMPP & APN service- SLe19,980",
+        "Kaard Automobile SL- Closed with CUG 10lines- SLe2,800",
+        "Sierra Leone Commercial Bank- Closed with Devices- SLe4,400",
+        "HMB SL- Closed with FTTX 60mbps- SLe3,750",
       ],
+      difficulties: ["No bank for payments in Waterloo and Wellington shops"],
       alignmentRequest: [
-        'Require a dedicated and temporary OM merchant account for Waterloo and Wellington shops pending when the banks are available in the shops'
-      ]
+        "Require a dedicated and temporary OM merchant account for Waterloo and Wellington shops pending when the banks are available in the shops",
+      ],
     });
 
     setSalesContributions([
-      { name: 'Ibrahim Bangura', team: 'LA1', amount: 19960.00 },
-      { name: 'Umu Jeneba', team: 'LA2', amount: 0.00 },
-      { name: 'Ibrahim Conteh', team: 'LA3', amount: 24880.00 },
-      { name: 'Rebecca Aruna', team: 'LA4', amount: 7200.00 },
-      { name: 'Alpha BAH', team: 'SME', amount: 2100.00 },
-      { name: 'Esther Mansaray/Alhaji Kuyateh', team: 'SoHo', amount: 5890.00 }
+      { name: "Ibrahim Bangura", team: "LA1", amount: 19960.0 },
+      { name: "Umu Jeneba", team: "LA2", amount: 0.0 },
+      { name: "Ibrahim Conteh", team: "LA3", amount: 24880.0 },
+      { name: "Rebecca Aruna", team: "LA4", amount: 7200.0 },
+      { name: "Alpha BAH", team: "SME", amount: 2100.0 },
+      { name: "Esther Mansaray/Alhaji Kuyateh", team: "SoHo", amount: 5890.0 },
     ]);
   }, []);
 
@@ -61,26 +66,40 @@ export default function WeeklyReportPage() {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto mt-8">
-        <h1 className="text-3xl font-bold mb-4">B2B Weekly Report - Network Update</h1>
+        <h1 className="text-3xl font-bold mb-4 text-gradient">
+          B2B Weekly Report - Network Update
+        </h1>
         {weeklyData && (
-          <Card className="mb-8">
+          <Card className="mb-8 border-brand-orange">
             <CardHeader>
-              <CardTitle>Week {weeklyData.weekNumber} Performance</CardTitle>
+              <CardTitle className="text-gradient">
+                Week {weeklyData.weekNumber} Performance
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <p>Sales: ${weeklyData.performanceMetrics.sales.toLocaleString()}</p>
+              <p>
+                Sales: ${weeklyData.performanceMetrics.sales.toLocaleString()}
+              </p>
               <p>New Customers: {weeklyData.performanceMetrics.newCustomers}</p>
-              <p>Customer Retention: {weeklyData.performanceMetrics.customerRetention}%</p>
+              <p>
+                Customer Retention:{" "}
+                {weeklyData.performanceMetrics.customerRetention}%
+              </p>
             </CardContent>
           </Card>
         )}
 
         {activityReport && (
           <div className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Activity Report</h2>
-            <Card className="mb-4">
-              
-                <CardTitle>Information Sharing</CardTitle>`2`
+            <h2 className="text-2xl font-bold mb-4 text-gradient">
+              Activity Report
+            </h2>
+            <Card className="mb-4 border-brand-orange">
+              <CardHeader>
+                <CardTitle className="text-gradient">
+                  Information Sharing
+                </CardTitle>
+              </CardHeader>
               <CardContent>
                 <ul className="list-disc pl-5">
                   {activityReport.informationSharing.map((item, index) => (
@@ -89,9 +108,11 @@ export default function WeeklyReportPage() {
                 </ul>
               </CardContent>
             </Card>
-            <Card className="mb-4">
-              <CardHeader> 
-                <CardTitle>What has worked well</CardTitle>
+            <Card className="mb-4 border-brand-orange">
+              <CardHeader>
+                <CardTitle className="text-gradient">
+                  What has worked well
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="list-disc pl-5">
@@ -101,9 +122,11 @@ export default function WeeklyReportPage() {
                 </ul>
               </CardContent>
             </Card>
-            <Card className="mb-4">
+            <Card className="mb-4 border-brand-orange">
               <CardHeader>
-                <CardTitle>Difficulties / Challenges / Red flags / Issues</CardTitle>
+                <CardTitle className="text-gradient">
+                  Difficulties / Challenges / Red flags / Issues
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="list-disc pl-5">
@@ -113,9 +136,11 @@ export default function WeeklyReportPage() {
                 </ul>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border-brand-orange">
               <CardHeader>
-                <CardTitle>Alignment / Coordination / Support Request</CardTitle>
+                <CardTitle className="text-gradient">
+                  Alignment / Coordination / Support Request
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="list-disc pl-5">
@@ -130,7 +155,9 @@ export default function WeeklyReportPage() {
 
         {salesContributions && (
           <div>
-            <h2 className="text-2xl font-bold mb-4">Sales Contributions - Week {weeklyData?.weekNumber}</h2>
+            <h2 className="text-2xl font-bold mb-4 text-gradient">
+              Sales Contributions - Week {weeklyData?.weekNumber}
+            </h2>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -149,8 +176,12 @@ export default function WeeklyReportPage() {
                 ))}
               </TableBody>
             </Table>
-            <p className="mt-4 font-bold">
-              Total contribution: {salesContributions.reduce((sum, item) => sum + item.amount, 0).toFixed(2)} SLE
+            <p className="mt-4 font-bold text-brand-orange">
+              Total contribution:{" "}
+              {salesContributions
+                .reduce((sum, item) => sum + item.amount, 0)
+                .toFixed(2)}{" "}
+              SLE
             </p>
           </div>
         )}
