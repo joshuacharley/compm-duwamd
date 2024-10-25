@@ -1,15 +1,28 @@
+"use client";
+
 import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
-export async function GET(request: Request) {
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
     const client = await clientPromise;
     const db = client.db("commercial_pm");
-    const projects = await db.collection("projects").find({}).toArray();
-    return NextResponse.json(projects);
-  } catch (e) {
-    console.error(e);
+
+    const project = await db
+      .collection("projects")
+      .findOne({ _id: new ObjectId(params.id) });
+
+    if (!project) {
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(project);
+  } catch (error) {
+    console.error("Error fetching project:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
@@ -17,34 +30,32 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+export async function PUT(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
     const client = await clientPromise;
     const db = client.db("commercial_pm");
     const body = await request.json();
-    const result = await db.collection("projects").insertOne(body);
-    return NextResponse.json(result);
-  } catch (e) {
-    console.error(e);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
-  }
-}
 
-export async function PUT(request: Request) {
-  try {
-    const client = await clientPromise;
-    const db = client.db("commercial_pm");
-    const body = await request.json();
     const { _id, ...updateData } = body;
+
     const result = await db
       .collection("projects")
-      .updateOne({ _id: new ObjectId(_id) }, { $set: updateData });
-    return NextResponse.json(result);
-  } catch (e) {
-    console.error(e);
+      .findOneAndUpdate(
+        { _id: new ObjectId(params.id) },
+        { $set: updateData },
+        { returnDocument: "after" }
+      );
+
+    if (!result?.value) {
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(result.value);
+  } catch (error) {
+    console.error("Error updating project:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
@@ -52,17 +63,25 @@ export async function PUT(request: Request) {
   }
 }
 
-export async function DELETE(request: Request) {
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
     const client = await clientPromise;
     const db = client.db("commercial_pm");
-    const { id } = await request.json();
+
     const result = await db
       .collection("projects")
-      .deleteOne({ _id: new ObjectId(id) });
-    return NextResponse.json(result);
-  } catch (e) {
-    console.error(e);
+      .deleteOne({ _id: new ObjectId(params.id) });
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: "Project deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting project:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

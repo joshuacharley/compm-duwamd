@@ -17,7 +17,7 @@ export default function InstallationSetupPage() {
     setIsFormOpen(true);
   };
 
-  const handleEdit = (item) => {
+  const handleEdit = (item: any) => {
     setEditingItem(item);
     setIsFormOpen(true);
   };
