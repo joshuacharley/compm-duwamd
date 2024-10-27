@@ -7,7 +7,6 @@ import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar } from "@/components/ui/calendar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Form,
@@ -31,7 +30,9 @@ import {
 } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
+import { NewProject } from "@/app/projects/ProjectsClient";
 
 const projectSchema = z.object({
   name: z.string().min(1, "Project name is required"),
@@ -50,7 +51,7 @@ const projectSchema = z.object({
 });
 
 interface NewProjectFormProps {
-  onSubmit: (data: z.infer<typeof projectSchema>) => void;
+  onSubmit: (data: NewProject) => void;
   onCancel: () => void;
 }
 
@@ -60,7 +61,7 @@ export default function NewProjectForm({
 }: NewProjectFormProps) {
   const [stakeholder, setStakeholder] = useState("");
 
-  const form = useForm<z.infer<typeof projectSchema>>({
+  const form = useForm<NewProject>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
       name: "",
@@ -187,7 +188,6 @@ export default function NewProjectForm({
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
-                          disabled={(date) => date < new Date("1900-01-01")}
                           initialFocus
                         />
                       </PopoverContent>
@@ -226,7 +226,6 @@ export default function NewProjectForm({
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
-                          disabled={(date) => date < new Date("1900-01-01")}
                           initialFocus
                         />
                       </PopoverContent>

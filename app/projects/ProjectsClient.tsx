@@ -4,10 +4,6 @@ import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Plus, Search, Filter } from "lucide-react";
-import { useRouter } from "next/navigation";
-import ProjectCard from "@/components/ProjectCard";
 import {
   Dialog,
   DialogContent,
@@ -15,24 +11,34 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import NewProjectForm from "@/components/NewProjectForm";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
+import ProjectCard from "@/components/ProjectCard";
+import NewProjectForm from "@/components/NewProjectForm";
+import { useRouter } from "next/navigation";
 
 export interface Project {
   _id: string;
   name: string;
   description: string;
-  status: "Not Started" | "In Progress" | "Completed" | "On Hold";
-  startDate: Date;
-  endDate: Date;
   objective: string;
   scope: string;
+  status: "Not Started" | "In Progress" | "Completed" | "On Hold";
+  priority: "Low" | "Medium" | "High";
+  startDate: Date;
+  endDate: Date;
+  manager: string;
+  department: string;
   stakeholders: string[];
   progress: number;
-  priority: "Low" | "Medium" | "High";
-  department: string;
-  manager: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
+
+export type NewProject = Omit<
+  Project,
+  "_id" | "progress" | "createdAt" | "updatedAt"
+>;
 
 export default function ProjectsClient() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -48,49 +54,66 @@ export default function ProjectsClient() {
   const fetchProjects = async () => {
     try {
       const response = await fetch("/api/projects");
+      if (!response.ok) {
+        throw new Error("Failed to fetch projects");
+      }
       const data = await response.json();
-      setProjects(data);
-      setLoading(false);
+
+      // Convert date strings to Date objects
+      const transformedProjects = data.map((project: any) => ({
+        ...project,
+        startDate: new Date(project.startDate),
+        endDate: new Date(project.endDate),
+        createdAt: new Date(project.createdAt),
+        updatedAt: new Date(project.updatedAt),
+      }));
+
+      setProjects(transformedProjects);
     } catch (error) {
       console.error("Error fetching projects:", error);
       toast.error("Failed to load projects");
+    } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateProject = async (
-    projectData: Omit<Project, "_id" | "progress">
-  ) => {
-    const completeProjectData = { ...projectData, progress: 0 }; // Default progress to 0
+  const handleCreateProject = async (projectData: NewProject) => {
     try {
       const response = await fetch("/api/projects", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Accept: "application/json",
         },
-        body: JSON.stringify(completeProjectData),
+        body: JSON.stringify(projectData),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to create project");
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Server returned non-JSON response");
       }
 
-      const newProject = await response.json();
-      setProjects([...projects, newProject]);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create project");
+      }
+
+      await fetchProjects();
       setIsDialogOpen(false);
       toast.success("Project created successfully");
     } catch (error) {
       console.error("Error creating project:", error);
-      toast.error("Failed to create project");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to create project"
+      );
     }
   };
 
   const filteredProjects = projects.filter(
     (project) =>
-      (project?.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-      (project?.description?.toLowerCase() || "").includes(
-        searchTerm.toLowerCase()
-      )
+      project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -110,35 +133,38 @@ export default function ProjectsClient() {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto mt-8 px-4">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-          <h1 className="text-3xl font-bold">Projects</h1>
-          <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-            <div className="relative flex-grow md:flex-grow-0">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                className="pl-10 w-full md:w-[300px]"
-                placeholder="Search projects..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" /> New Project
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[600px]">
-                <DialogHeader>
-                  <DialogTitle>Create New Project</DialogTitle>
-                </DialogHeader>
-                <NewProjectForm
-                  onSubmit={handleCreateProject}
-                  onCancel={() => setIsDialogOpen(false)}
-                />
-              </DialogContent>
-            </Dialog>
+        <div className="flex justify-between items-center mb-8">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold">Projects</h1>
+            <p className="text-muted-foreground">
+              Manage and track all your projects in one place
+            </p>
           </div>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" /> New Project
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Create New Project</DialogTitle>
+              </DialogHeader>
+              <NewProjectForm
+                onSubmit={handleCreateProject}
+                onCancel={() => setIsDialogOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        <div className="mb-6">
+          <Input
+            placeholder="Search projects..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-md"
+          />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -153,8 +179,11 @@ export default function ProjectsClient() {
 
         {filteredProjects.length === 0 && (
           <div className="text-center py-12">
+            <h2 className="text-xl font-semibold mb-2">No projects found</h2>
             <p className="text-muted-foreground">
-              No projects found. Create a new project to get started.
+              {searchTerm
+                ? "No projects match your search criteria"
+                : "Start by creating your first project"}
             </p>
           </div>
         )}

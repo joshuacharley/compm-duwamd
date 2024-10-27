@@ -20,17 +20,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import TaskForm from "./TaskForm";
+import TaskForm, { TaskFormData } from "@/components/TaskForm";
 import { toast } from "sonner";
 
 interface Task {
   _id: string;
   title: string;
-  description: string;
+  description?: string;
   assignedTo: string;
-  dueDate: Date;
+  dueDate: string;
   priority: "Low" | "Medium" | "High";
   status: "Not Started" | "In Progress" | "Completed";
+  projectId: string;
 }
 
 interface TaskManagementProps {
@@ -58,29 +59,62 @@ export default function TaskManagement({ projectId }: TaskManagementProps) {
     }
   };
 
-  const handleTaskSubmit = async (taskData: Omit<Task, "_id">) => {
+  const handleCreateTask = async (formData: TaskFormData) => {
     try {
-      const url = editingTask
-        ? `/api/projects/${projectId}/tasks/${editingTask._id}`
-        : `/api/projects/${projectId}/tasks`;
+      const taskData = {
+        ...formData,
+        dueDate: formData.dueDate.toISOString(),
+      };
 
-      const response = await fetch(url, {
-        method: editingTask ? "PUT" : "POST",
+      const response = await fetch(`/api/projects/${projectId}/tasks`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(taskData),
       });
 
-      if (!response.ok) throw new Error("Failed to save task");
+      if (!response.ok) throw new Error("Failed to create task");
+
+      await fetchTasks();
+      setIsDialogOpen(false);
+      toast.success("Task created successfully");
+    } catch (error) {
+      console.error("Error creating task:", error);
+      toast.error("Failed to create task");
+    }
+  };
+
+  const handleUpdateTask = async (formData: TaskFormData) => {
+    if (!editingTask?._id) return;
+
+    try {
+      const taskData = {
+        ...formData,
+        dueDate: formData.dueDate.toISOString(),
+      };
+
+      const response = await fetch(
+        `/api/projects/${projectId}/tasks/${editingTask._id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(taskData),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to update task");
+      }
 
       await fetchTasks();
       setIsDialogOpen(false);
       setEditingTask(null);
-      toast.success(
-        editingTask ? "Task updated successfully" : "Task created successfully"
-      );
+      toast.success("Task updated successfully");
     } catch (error) {
-      console.error("Error saving task:", error);
-      toast.error("Failed to save task");
+      console.error("Error updating task:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update task"
+      );
     }
   };
 
@@ -104,6 +138,15 @@ export default function TaskManagement({ projectId }: TaskManagementProps) {
       toast.error("Failed to delete task");
     }
   };
+
+  const getFormDataFromTask = (task: Task): TaskFormData => ({
+    title: task.title,
+    description: task.description || "",
+    assignedTo: task.assignedTo,
+    dueDate: new Date(task.dueDate),
+    priority: task.priority,
+    status: task.status,
+  });
 
   const priorityColors = {
     Low: "bg-blue-100 text-blue-800",
@@ -134,8 +177,10 @@ export default function TaskManagement({ projectId }: TaskManagementProps) {
               </DialogTitle>
             </DialogHeader>
             <TaskForm
-              initialData={editingTask}
-              onSubmit={handleTaskSubmit}
+              initialData={
+                editingTask ? getFormDataFromTask(editingTask) : undefined
+              }
+              onSubmit={editingTask ? handleUpdateTask : handleCreateTask}
               onCancel={() => {
                 setIsDialogOpen(false);
                 setEditingTask(null);
@@ -199,6 +244,15 @@ export default function TaskManagement({ projectId }: TaskManagementProps) {
             ))}
           </TableBody>
         </Table>
+
+        {tasks.length === 0 && (
+          <div className="text-center py-12">
+            <h2 className="text-xl font-semibold mb-2">No tasks found</h2>
+            <p className="text-muted-foreground">
+              Start by creating your first task for this project
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
