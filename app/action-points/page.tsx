@@ -1,51 +1,65 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Header } from '@/components/Header';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useState, useEffect } from "react";
+import { Header } from "@/components/Header";
+import ActionPointList from "@/components/ActionPointList";
+import ActionPointForm from "@/components/ActionPointForm";
+import { Button } from "@/components/ui/button";
+import { PlusCircle } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function ActionPointsPage() {
-  const [actionPoints, setActionPoints] = useState([]);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingActionPoint, setEditingActionPoint] = useState(null);
 
-  useEffect(() => {
-    // Fetch action points from API
-    // For now, we'll use mock data
-    setActionPoints([
-      { id: 1, topic: 'SIERRA TROPICAL', description: 'Umar to have an engagement with the customer.', processingDate: '02-Sep-24', responsibility: 'Umaru', expectedClosingDate: '06-Sep-24', status: 'Pending' },
-      { id: 2, topic: 'PIH', description: 'Nyake/Umar to engage customer for a test', processingDate: '30-Sep-24', responsibility: 'Umaru', expectedClosingDate: '7-Sep-24', status: 'Pending' },
-      // ... add more mock data
-    ]);
-  }, []);
+  const handleAddNew = () => {
+    setEditingActionPoint(null);
+    setIsFormOpen(true);
+  };
+
+  const handleEdit = (actionPoint: any) => {
+    setEditingActionPoint(actionPoint);
+    setIsFormOpen(true);
+  };
+
+  const handleFormClose = () => {
+    setIsFormOpen(false);
+    setEditingActionPoint(null);
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container mx-auto mt-8">
-        <h1 className="text-3xl font-bold mb-4">Action Points</h1>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Topic</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Processing Date</TableHead>
-              <TableHead>Responsibility</TableHead>
-              <TableHead>Expected Closing Date</TableHead>
-              <TableHead>Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {actionPoints.map((point) => (
-              <TableRow key={point.id}>
-                <TableCell>{point.topic}</TableCell>
-                <TableCell>{point.description}</TableCell>
-                <TableCell>{point.processingDate}</TableCell>
-                <TableCell>{point.responsibility}</TableCell>
-                <TableCell>{point.expectedClosingDate}</TableCell>
-                <TableCell>{point.status}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      <main className="container mx-auto mt-8 px-4">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h1 className="text-3xl font-bold mb-4 text-gradient">
+            Action Points
+          </h1>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Button
+            onClick={handleAddNew}
+            className="mb-4 bg-brand-orange hover:bg-brand-orange/90 text-white"
+          >
+            <PlusCircle className="mr-2 h-4 w-4" /> Add New Action Point
+          </Button>
+        </motion.div>
+        <ActionPointList onEdit={handleEdit} />
+        {isFormOpen && (
+          <ActionPointForm
+            isOpen={isFormOpen}
+            onClose={handleFormClose}
+            editingActionPoint={editingActionPoint}
+          />
+        )}
       </main>
     </div>
   );
