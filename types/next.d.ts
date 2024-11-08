@@ -1,9 +1,9 @@
-import { Server as NetServer, Socket } from "net";
-import { NextApiResponse } from "next";
+import { Server as NetServer } from "http";
+import { Socket as NetSocket } from "net";
 import { Server as SocketIOServer } from "socket.io";
 
 export type NextApiResponseServerIO = NextApiResponse & {
-  socket: Socket & {
+  socket: NetSocket & {
     server: NetServer & {
       io: SocketIOServer;
     };

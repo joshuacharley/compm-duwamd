@@ -29,6 +29,7 @@ import {
   Briefcase,
   FileText,
 } from "lucide-react";
+import BidAlerts from "./BidAlerts";
 
 interface Bid {
   _id?: string;
@@ -123,7 +124,7 @@ export default function BidsClient() {
   const handleEdit = (bid: Bid) => {
     setFormData({
       ...bid,
-      deadline: new Date(bid.deadline).toISOString().split("T")[0], // Convert to YYYY-MM-DD format
+      deadline: new Date(bid.deadline).toISOString().split("T")[0],
     });
     setIsDialogOpen(true);
   };
@@ -209,91 +210,102 @@ export default function BidsClient() {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto mt-8 px-4">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-primary">Bids Management</h1>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button
-                onClick={() =>
-                  setFormData({
-                    name: "",
-                    service: "",
-                    deadline: "",
-                    biddingType: "",
-                    keyRequirements: [],
-                  })
-                }
-              >
-                <PlusCircle className="mr-2 h-4 w-4" /> Add New Bid
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>
-                  {formData._id ? "Edit Bid" : "Add New Bid"}
-                </DialogTitle>
-              </DialogHeader>
-              {renderBidForm()}
-            </DialogContent>
-          </Dialog>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {bids.map((bid) => (
-            <Card
-              key={bid._id}
-              className="hover:shadow-lg transition-shadow duration-300"
-            >
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="text-lg font-semibold text-primary">
-                    {bid.name}
-                  </span>
-                  <span className="text-sm font-medium text-muted-foreground">
-                    {bid.biddingType}
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <p className="flex items-center text-sm text-muted-foreground">
-                    <Briefcase className="mr-2 h-4 w-4" />
-                    {bid.service}
-                  </p>
-                  <p className="flex items-center text-sm text-muted-foreground">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    {new Date(bid.deadline).toLocaleDateString()}
-                  </p>
-                  <div>
-                    <h3 className="text-sm font-semibold mt-4 mb-2 flex items-center">
-                      <FileText className="mr-2 h-4 w-4" />
-                      Key Requirements:
-                    </h3>
-                    <ul className="list-disc pl-5 text-sm text-muted-foreground">
-                      {bid.keyRequirements.map((req, index) => (
-                        <li key={index}>{req}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-end space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleEdit(bid)}
+        <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex-1">
+            <div className="flex justify-between items-center mb-8">
+              <h1 className="text-3xl font-bold text-primary">
+                Bids Management
+              </h1>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    onClick={() =>
+                      setFormData({
+                        name: "",
+                        service: "",
+                        deadline: "",
+                        biddingType: "",
+                        keyRequirements: [],
+                      })
+                    }
+                  >
+                    <PlusCircle className="mr-2 h-4 w-4" /> Add New Bid
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>
+                      {formData._id ? "Edit Bid" : "Add New Bid"}
+                    </DialogTitle>
+                  </DialogHeader>
+                  {renderBidForm()}
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="grid gap-6">
+              {bids.map((bid) => (
+                <Card
+                  key={bid._id}
+                  className="hover:shadow-lg transition-shadow duration-300"
                 >
-                  <Edit className="mr-2 h-4 w-4" /> Edit
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => handleDelete(bid._id!)}
-                >
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <span className="text-lg font-semibold text-primary">
+                        {bid.name}
+                      </span>
+                      <span className="text-sm font-medium text-muted-foreground">
+                        {bid.biddingType}
+                      </span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <p className="flex items-center text-sm text-muted-foreground">
+                        <Briefcase className="mr-2 h-4 w-4" />
+                        {bid.service}
+                      </p>
+                      <p className="flex items-center text-sm text-muted-foreground">
+                        <Calendar className="mr-2 h-4 w-4" />
+                        {new Date(bid.deadline).toLocaleDateString()}
+                      </p>
+                      <div>
+                        <h3 className="text-sm font-semibold mt-4 mb-2 flex items-center">
+                          <FileText className="mr-2 h-4 w-4" />
+                          Key Requirements:
+                        </h3>
+                        <ul className="list-disc pl-5 text-sm text-muted-foreground">
+                          {bid.keyRequirements.map((req, index) => (
+                            <li key={index}>{req}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex justify-end space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(bid)}
+                    >
+                      <Edit className="mr-2 h-4 w-4" /> Edit
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDelete(bid._id!)}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" /> Delete
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          <div className="lg:w-[400px]">
+            <BidAlerts />
+          </div>
         </div>
       </main>
     </div>
